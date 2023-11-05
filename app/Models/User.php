@@ -42,4 +42,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function chats()
+    {
+        return $this->hasManyThrough(Chat::class, ChatUser::class, 'user_id', 'id', 'id', 'chat_id');
+    }
 }
