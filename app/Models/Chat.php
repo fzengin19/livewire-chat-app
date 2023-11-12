@@ -10,7 +10,9 @@ class Chat extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'last_message_id'
+        'last_message_id',
+        'name',
+        'type'
     ];
 
     public function lastMessage()
