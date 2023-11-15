@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Scrollbar yatay ve dikey stil */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+    background: #36404f;
+}
+
+/* Scrollbar handle (thumb) */
+::-webkit-scrollbar-thumb {
+    background: #5046e4;
+}
+
+/* Scrollbar handle (thumb) üzerine gelindiğinde stil */
+::-webkit-scrollbar-thumb:hover {
+    background: #3036e4;
+}

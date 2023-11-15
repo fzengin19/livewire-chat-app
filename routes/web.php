@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\ChatAppComponent;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,12 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
+Route::view('chats', 'chats')
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('chats');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
