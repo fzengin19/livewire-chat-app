@@ -17,7 +17,7 @@ class Chat extends Model
 
     public function lastMessage()
     {
-        return $this->hasOne(Message::class, 'last_message_id');
+        return $this->hasOne(Message::class, 'id', 'last_message_id')->orderBy('id', 'desc');
     }
     public function users()
     {
