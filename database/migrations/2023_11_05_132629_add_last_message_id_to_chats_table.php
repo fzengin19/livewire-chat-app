@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('chats', function (Blueprint $table) {
-            $table->foreignId('last_message_id')->references('id')->on('messages');
+            $table->foreignId('last_message_id')->nullable()->references('id')->on('messages');
         });
     }
 
