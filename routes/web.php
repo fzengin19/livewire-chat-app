@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\SendMessageEvent;
 use App\Livewire\ChatAppComponent;
 use Illuminate\Support\Facades\Route;
 
@@ -27,5 +28,8 @@ Route::view('users', 'users')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+Route::get('/test', function () {
 
+    broadcast(new SendMessageEvent());
+});
 require __DIR__ . '/auth.php';
