@@ -1,6 +1,11 @@
 import "./bootstrap";
 
 // Fonksiyon: Pencere boyutu değiştikçe kontrol et
+setTimeout(()=>{
+    window.Echo.channel('test').listen('.App\\Events\\SendMessageEvent', (e) => {
+        console.log(e);
+    });
+    },200)
 
 function adjustChatView() {
     var windowWidth = window.innerWidth;
