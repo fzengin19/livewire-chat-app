@@ -16,9 +16,8 @@ class UsersComponent extends Component
     {
         $query = User::where('id', '!=', Auth::id());
         if (!empty($this->search)) {
-            $query->where(function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
-            });
+
+            $query->where('name', 'like', '%' . $this->search . '%');
         }
         $users = $query->paginate(8);
         return view('livewire.users-component', compact('users'));

@@ -2,8 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Events\SendMessageEvent;
 use App\Models\Chat;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -13,7 +15,7 @@ class ChatAppComponent extends Component
     public $chats;
     public $message;
 
-    public function __construct()
+    public function mount()
     {
         $this->loadChats();
     }
@@ -21,6 +23,7 @@ class ChatAppComponent extends Component
 
     public function render()
     {
+
         $data['chats'] = $this->chats;
 
         if (isset($this->activeChat)) {
@@ -31,25 +34,35 @@ class ChatAppComponent extends Component
     }
     public function selectChat($id)
     {
-        $selectedChat = $this->chats->where('id', $id)->first();
-
-        if ($selectedChat) {
-            // Veritabanına gitmeden koleksiyon içinde işlem yap
-            $this->chats = $this->chats->map(function ($chat) use ($selectedChat) {
-                if ($chat->id === $selectedChat->id) {
-                    // İlgili sohbeti güncelle
-                    $this->activeChat = $chat;
-                }
-                return $chat;
-            });
-            if (!isset($this->activeChat->messages)) {
-                $this->activeChat->load('messages');
+        foreach ($this->chats as $key => $chat) {
+            if ($chat->id === $id) {
+                $this->activeChat = $chat;
             }
+        }
+        $this->loadChats();
+        if (!isset($this->activeChat->messages)) {
+            $this->activeChat->load('messages');
         }
     }
     public function loadChats()
     {
         $this->chats = auth()->user()->chats()->orderBy('last_message_id', 'desc')->get();
+    }
+
+    public function  getListeners()
+    {
+
+        $auth_id = auth()->user()->id;
+        return [
+            "echo-private:chat.{$auth_id},SendMessageEvent" => 'receiveMessage',
+        ];
+    }
+    public function receiveMessage($event)
+    {
+        if (isset($this->activeChat))
+            $this->activeChat->refresh();
+        $this->dispatch('messageReceived');
+        $this->loadChats();
     }
 
     public function sendMessage()
@@ -63,15 +76,11 @@ class ChatAppComponent extends Component
             $this->activeChat->update([
                 'last_message_id' => $message->id
             ]);
-            $this->chats = $this->chats->map(function ($chat) use ($message) {
-                if ($chat->id === $this->activeChat->id) {
-                    $chat->last_message_id = $message->id;
-                }
-                return $chat;
-            })->sortByDesc('last_message_id');
-            // $this->loadChats();
-
+            $this->dispatch('messageReceived');
+            // dd(($users));
+            broadcast(new SendMessageEvent($message));
             $this->message = null;
+            $this->loadChats();
         }
     }
 }
