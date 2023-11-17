@@ -80,7 +80,7 @@ class ChatAppComponent extends Component
             // dd(($users));
             broadcast(new SendMessageEvent($message));
             $this->message = null;
-            $this->loadChats();
+            // $this->loadChats();
         }
     }
 }
