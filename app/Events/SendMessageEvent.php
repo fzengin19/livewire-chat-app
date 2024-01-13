@@ -12,16 +12,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SendMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    protected Message $message;
-    /**
-     * Create a new event instance.
-     */
-    public function __construct(Message $message)
+    public ?Message $message;
+    public function __construct($message)
     {
         $this->message = $message;
     }
@@ -44,8 +42,12 @@ class SendMessageEvent implements ShouldBroadcast
 
     public function broadcastWith()
     {
-        return [
-            'message' => $this->message->toArray()
+        $data = [
+            'message' => $this->message,
         ];
+
+        Log::info('Broadcast Data', $data);
+
+        return  $data;
     }
 }

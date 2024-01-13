@@ -14,34 +14,51 @@ class ChatAppComponent extends Component
     public ?Chat $activeChat;
     public $chats;
     public $message;
+    public $offset;
+    public $messages;
+    public $height;
 
     public function mount()
     {
+        $this->offset = 1;
         $this->loadChats();
     }
 
 
     public function render()
     {
-
         $data['chats'] = $this->chats;
-
         if (isset($this->activeChat)) {
             $data['activeChat'] = $this->activeChat;
+            $data['messages'] = $this->messages;
         }
-
         return view('livewire.chat-app-component', $data);
     }
     public function selectChat($id)
     {
+        $this->offset = 1;
         foreach ($this->chats as $key => $chat) {
             if ($chat->id === $id) {
                 $this->activeChat = $chat;
             }
         }
         $this->loadChats();
-        if (!isset($this->activeChat->messages)) {
-            $this->activeChat->load('messages');
+        $this->message = null;
+        $this->messages = Message::where('chat_id', $this->activeChat->id)->orderBy('id', 'desc')->take(20 * $this->offset)->get();
+        $this->messages = $this->messages->reverse();
+        // dd($this->messages);
+        $this->dispatch('selectChat');
+    }
+
+    public function loadMoreMessages()
+    {
+        $this->offset += 1;
+        $message = $this->messages->first();
+        if (isset($this->activeChat)) {
+            $this->messages = Message::where('chat_id', $this->activeChat->id)->orderBy('id', 'desc')->take(20 * $this->offset)->get();
+            // $this->messages = $this->messages->sortBy('id');
+            // $this->messages = $this->messages->reverse();
+            $this->dispatch('messagesAdded');
         }
     }
     public function loadChats()
@@ -51,18 +68,27 @@ class ChatAppComponent extends Component
 
     public function  getListeners()
     {
-
         $auth_id = auth()->user()->id;
         return [
             "echo-private:chat.{$auth_id},SendMessageEvent" => 'receiveMessage',
+            'loadMoreMessages',
+            'getLastMessage'
         ];
     }
     public function receiveMessage($event)
     {
-        if (isset($this->activeChat))
-            $this->activeChat->refresh();
-        $this->dispatch('messageReceived');
-        $this->loadChats();
+        if (isset($this->activeChat)) {
+
+            $this->dispatch('messageReceived', $event);
+            $message = Message::find($event['message']['id']);
+            $this->messages[] = $message;
+            // $this->messages = $this->messages->reverse();
+            // $this->messages = $this->messages->sortBy('id');
+        }
+    }
+    public function closeChat()
+    {
+        unset($this->activeChat);
     }
 
     public function sendMessage()
@@ -76,11 +102,12 @@ class ChatAppComponent extends Component
             $this->activeChat->update([
                 'last_message_id' => $message->id
             ]);
-            $this->dispatch('messageReceived');
-            // dd(($users));
+            $this->messages[] = $message;
+            // $this->messages = $this->messages->sortBy('id');
+            // $this->messages = $this->messages->reverse();
+            $this->dispatch('messageReceived', $message);
             broadcast(new SendMessageEvent($message));
             $this->message = null;
-            // $this->loadChats();
         }
     }
 }

@@ -6,7 +6,9 @@
     width: 8px;
     height: 8px;
 }
-
+* {
+    transition: all 0.3s ease;
+}
 /* Scrollbar track */
 ::-webkit-scrollbar-track {
     background: #36404f;

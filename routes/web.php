@@ -3,6 +3,7 @@
 use App\Events\SendMessageEvent;
 use App\Livewire\ChatAppComponent;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\DomCrawler\Crawler;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,10 @@ Route::view('profile', 'profile')
     ->name('profile');
 Route::get('/test', function () {
 
-    broadcast(new SendMessageEvent());
+    $html =  file_get_contents('https://canlidoviz.com/');
+
+    $crawler = new Crawler($html);
+    $card = $crawler->filter('div[class="grid grid-cols-1 sm:grid-cols-2 sm:gap-6 border-b-[0.03rem] border-divide theme-dark:border-darkDivide theme-light:border-wDivide order-3 sm:order-none"]');
+    echo $card->text();
 });
 require __DIR__ . '/auth.php';
